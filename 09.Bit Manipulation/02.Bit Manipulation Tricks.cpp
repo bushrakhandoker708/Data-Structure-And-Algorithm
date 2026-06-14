@@ -1,181 +1,208 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+
 /*
-=========================================================
-BIT MANIPULATION TRICKS
-=========================================================
+---------------------------------------------------------
+0. CORE CONCEPTS: SHIFT OPERATORS
+---------------------------------------------------------
 
-This program demonstrates several fundamental bit manipulation 
-techniques with clear explanations. 
+Left Shift (<<):
+----------------
+n << i  → multiplies n by 2^i
+Example:
+5 = 0101
+5 << 1 = 1010 = 10
 
-Covered Topics:
-1. Swapping numbers without a third variable (using XOR).
-2. Checking if the i-th bit is set.
-3. Setting the i-th bit.
-4. Clearing the i-th bit.
-5. Toggling the i-th bit.
-6. Removing the last set bit.
-7. Checking if a number is a power of two.
-8. Counting the number of set bits.
-=========================================================
+Right Shift (>>):
+------------------
+n >> i → divides n by 2^i (integer division)
+Example:
+5 = 0101
+5 >> 1 = 0010 = 2
 */
 
-// ------------------------------
-// 1. Swap two numbers using XOR
-// ------------------------------
-// Logic: 
-// A = A ^ B
-// B = A ^ B  -> gives original A
-// A = A ^ B  -> gives original B
-void swapNumbers(int &A, int &B) {
-    A = A ^ B;
-    B = A ^ B;
-    A = A ^ B;
+/*
+---------------------------------------------------------
+1. GET RIGHTMOST BIT 
+---------------------------------------------------------
+
+We want the last bit (LSB).
+Three methods:
+
+Method A: AND with 1
+Method B: Right shift + AND
+Method C: XOR trick (advanced intuition)
+*/
+
+// Method A
+int rightmostBit_AND(int n) {
+    return n & 1;
 }
 
-// ------------------------------
-// 2. Check if i-th bit is set
-// ------------------------------
-// Two methods:
-// a) Left shift mask: (n & (1 << i))
-// b) Right shift n:   ((n >> i) & 1)
-bool isBitSet_LeftShift(int n, int i) {
-    return (n & (1 << i)) != 0;
+// Method B
+int rightmostBit_Shift(int n) {
+    return (n >> 0) & 1; // same as AND but shows shift concept
 }
 
-bool isBitSet_RightShift(int n, int i) {
-    return ((n >> i) & 1) != 0;
+// Method C (isolating lowest set bit, NOT just bit value)
+int lowestSetBit(int n) {
+    return n & (-n);
 }
 
-// ------------------------------
-// 3. Set the i-th bit
-// ------------------------------
-// Logic: n | (1 << i)
+/*
+---------------------------------------------------------
+2. CHECK i-th BIT
+---------------------------------------------------------
+*/
+bool isBitSet(int n, int i) {
+    return (n & (1 << i));
+}
+
+/*
+---------------------------------------------------------
+3. SET i-th BIT
+---------------------------------------------------------
+*/
 int setBit(int n, int i) {
     return n | (1 << i);
 }
 
-// ------------------------------
-// 4. Clear the i-th bit
-// ------------------------------
-// Logic: n & (~(1 << i))
+/*
+---------------------------------------------------------
+4. CLEAR i-th BIT
+---------------------------------------------------------
+*/
 int clearBit(int n, int i) {
     return n & (~(1 << i));
 }
 
-// ------------------------------
-// 5. Toggle the i-th bit
-// ------------------------------
-// Logic: n ^ (1 << i)
+/*
+---------------------------------------------------------
+5. TOGGLE i-th BIT
+---------------------------------------------------------
+*/
 int toggleBit(int n, int i) {
     return n ^ (1 << i);
 }
 
-// ------------------------------
-// 6. Remove the last set bit
-// ------------------------------
-// Logic: n & (n - 1)
+/*
+---------------------------------------------------------
+6. REMOVE LAST SET BIT (IMPORTANT TRICK)
+---------------------------------------------------------
+*/
 int removeLastSetBit(int n) {
     return n & (n - 1);
 }
 
-// ------------------------------
-// 7. Check if number is power of two
-// ------------------------------
-// Property: Only powers of two have exactly one set bit.
-// Logic: (n > 0) && ((n & (n - 1)) == 0)
+/*
+---------------------------------------------------------
+7. SWAP USING XOR (NO TEMP VARIABLE)
+---------------------------------------------------------
+*/
+void swapXOR(int &a, int &b) {
+    a = a ^ b;
+    b = a ^ b;
+    a = a ^ b;
+}
+
+/*
+---------------------------------------------------------
+8. CHECK POWER OF TWO
+---------------------------------------------------------
+*/
 bool isPowerOfTwo(int n) {
     return (n > 0) && ((n & (n - 1)) == 0);
 }
 
-// ------------------------------
-// 8. Count set bits
-// ------------------------------
+/*
+---------------------------------------------------------
+9. COUNT SET BITS (EASY → HARD)
+---------------------------------------------------------
+*/
 
-// Method A: Simple bit check with n & 1
-int countSetBits_Shift(int n) {
-    int count = 0;
+// Method A: Bit by bit
+int countBits_Shift(int n) {
+    int cnt = 0;
     while (n > 0) {
-        if (n & 1) count++; // check last bit
-        n >>= 1;            // right shift by 1 (divide by 2)
+        cnt += (n & 1);
+        n >>= 1;
     }
-    return count;
+    return cnt;
 }
 
-// Method B: Brian Kernighan’s Algorithm
-// Logic: Each step removes the rightmost set bit.
-int countSetBits_BK(int n) {
-    int count = 0;
+// Method B: Brian Kernighan (important interview trick)
+int countBits_BK(int n) {
+    int cnt = 0;
     while (n > 0) {
-        n = n & (n - 1); // remove one set bit
-        count++;
+        n = n & (n - 1);
+        cnt++;
     }
-    return count;
+    return cnt;
 }
 
-// Method C: Built-in function (fastest, uses CPU instruction)
-int countSetBits_Builtin(int n) {
-    return __builtin_popcount(n); 
+// Method C: Built-in (fastest)
+int countBits_builtin(int n) {
+    return __builtin_popcount(n);
 }
 
-// =========================================================
-// Driver Function to Demonstrate All Methods
-// =========================================================
+/*
+=========================================================
+MAIN DEMO
+=========================================================
+*/
 int main() {
-    int a = 13, b = 7;
 
-    cout << "================= Bit Manipulation Demo =================\n\n";
+    cout << "================ BIT MANIPULATION =================\n\n";
 
-    // 1. Swap numbers
-    cout << "1. Swapping numbers without third variable:\n";
-    cout << "Before: a = " << a << ", b = " << b << "\n";
-    swapNumbers(a, b);
-    cout << "After:  a = " << a << ", b = " << b << "\n\n";
+    int n = 13; // 1101
 
-    // 2. Check if i-th bit is set
-    int n = 13; // binary = 1101
-    int i = 2;
-    cout << "2. Checking if the " << i << "-th bit is set in " << n << " (1101):\n";
-    cout << "Using Left Shift: " << isBitSet_LeftShift(n, i) << "\n";
-    cout << "Using Right Shift: " << isBitSet_RightShift(n, i) << "\n\n";
+    // 1. Rightmost bit extraction
+    cout << "1. Rightmost bit of " << n << ":\n";
+    cout << "AND method: " << rightmostBit_AND(n) << "\n";
+    cout << "Shift method: " << rightmostBit_Shift(n) << "\n";
+    cout << "Lowest set bit (advanced): " << lowestSetBit(n) << "\n\n";
 
-    // 3. Set i-th bit
-    n = 9; // binary = 1001
-    i = 2;
-    cout << "3. Setting the " << i << "-th bit in " << n << " (1001):\n";
-    cout << "Result: " << setBit(n, i) << " (binary 1101)\n\n";
+    // 2. Shift explanation
+    cout << "2. Shift demo:\n";
+    cout << "n << 1 = " << (n << 1) << "\n";
+    cout << "n >> 1 = " << (n >> 1) << "\n\n";
 
-    // 4. Clear i-th bit
-    n = 13; // binary = 1101
-    i = 2;
-    cout << "4. Clearing the " << i << "-th bit in " << n << " (1101):\n";
-    cout << "Result: " << clearBit(n, i) << " (binary 1001)\n\n";
-
-    // 5. Toggle i-th bit
-    n = 13; // binary = 1101
-    i = 1;
-    cout << "5. Toggling the " << i << "-th bit in " << n << " (1101):\n";
-    cout << "Result: " << toggleBit(n, i) << " (binary 1111)\n\n";
+    // 3. Bit operations
+    cout << "3. Set bit 2 of 9: " << setBit(9, 2) << "\n";
+    cout << "4. Clear bit 2 of 13: " << clearBit(13, 2) << "\n";
+    cout << "5. Toggle bit 1 of 13: " << toggleBit(13, 1) << "\n\n";
 
     // 6. Remove last set bit
-    n = 12; // binary = 1100
-    cout << "6. Removing last set bit of " << n << " (1100):\n";
-    cout << "Result: " << removeLastSetBit(n) << " (binary 1000)\n\n";
+    cout << "6. Remove last set bit of 12: " << removeLastSetBit(12) << "\n\n";
 
-    // 7. Check if power of two
-    n = 16;
-    cout << "7. Checking if " << n << " is power of two:\n";
-    cout << (isPowerOfTwo(n) ? "Yes" : "No") << "\n\n";
+    // 7. Power of two
+    cout << "7. Is 16 power of two? " << isPowerOfTwo(16) << "\n\n";
 
-    // 8. Count set bits
-    n = 13; // binary = 1101
-    cout << "8. Counting set bits in " << n << " (1101):\n";
-    cout << "Method A (Shift): " << countSetBits_Shift(n) << "\n";
-    cout << "Method B (Brian Kernighan): " << countSetBits_BK(n) << "\n";
-    cout << "Method C (Builtin): " << countSetBits_Builtin(n) << "\n";
+    // 8. Count bits
+    cout << "8. Count set bits in 13:\n";
+    cout << "Shift: " << countBits_Shift(13) << "\n";
+    cout << "BK: " << countBits_BK(13) << "\n";
+    cout << "Builtin: " << countBits_builtin(13) << "\n";
 
-    cout << "\n=========================================================\n";
+    cout << "\n====================================================\n";
 
     return 0;
 }
+
+/*
+=========================================================
+COMPLEXITY SUMMARY
+=========================================================
+
+All bit operations:
+- Time: O(1) per operation (32-bit integer max loop = constant)
+- Space: O(1)
+
+Counting bits:
+- Shift method: O(log n)
+- Brian Kernighan: O(set bits)
+- Builtin: O(1)
+
+=========================================================
+*/
